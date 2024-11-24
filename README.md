@@ -22,6 +22,7 @@ This project is my attempt to revive the outdated YouTube app on iOS 7-10 device
 - **PHP**
 - **Cephei**
 - **Lighttpd**
+- **Invidious Insteance** (locally prefered but also can use public)
 - YouTube app (obviously)
   
 ### Installation
