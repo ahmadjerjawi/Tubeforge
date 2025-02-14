@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# Function to find YouTube.app dynamically
+find_youtube_app() {
+    YOUTUBE_PATH=$(find /var/mobile/Applications -name "YouTube.app" 2>/dev/null)
+    if [ -z "$YOUTUBE_PATH" ]; then
+        YOUTUBE_PATH=$(find /var/containers/Bundle/Application -name "YouTube.app" 2>/dev/null)
+    fi
+    echo "$YOUTUBE_PATH"
+}
+
+# Function to handle errors
+handle_error() {
+    echo "Error: $1"
+}
+
+# Locate YouTube.app
+YOUTUBE_APP_PATH=$(find_youtube_app)
+
+# Check if YouTube.app was found
+if [ -n "$YOUTUBE_APP_PATH" ]; then
+    INFO_PLIST_PATH="$YOUTUBE_APP_PATH/Info.plist"
+    plutil -set CFBundleDisplayName -string TubeForge "$INFO_PLIST_PATH" || handle_error "Failed to update CFBundleDisplayName"
+    plutil -set CFBundleVersion -string 18.15 "$INFO_PLIST_PATH" || handle_error "Failed to update CFBundleVersion"
+    cp -r /Library/TweakInject/TubeForge/web "$YOUTUBE_APP_PATH" || handle_error "Failed to copy web directory"
+else
+    handle_error "YouTube.app not found! Exiting installation."
+fi
+
+# Check if the tubeforge script exists
+if [ ! -f /Library/TweakInject/TubeForge/tubeforge ]; then
+    handle_error "tubeforge script not found! Exiting installation."
+fi
+
+# Move tubeforge script to /bin and make it executable
+cp /Library/TweakInject/TubeForge/tubeforge /bin/tubeforge || handle_error "Failed to copy tubeforge script"
+chmod +x /bin/tubeforge || handle_error "Failed to make tubeforge script executable"
+
+# Update icon cache
+su - mobile -c uicache || handle_error "Failed to update icon cache"
+echo "This will delete: /Library/TweakInject"
+rm -rf /Library/TweakInject || handle_error "Oh hell nah rm -rf failed To Delete /Library/TweakInject your are cooked lil bro"
+
+echo "Installation completed successfully."

@@ -1,0 +1,93 @@
+#!/bin/bash
+
+# Path to the Root.plist file
+PLIST_PATH="/Library/PreferenceBundles/TubeForgePref.bundle/Root.plist"
+
+# Function to find YouTube app path
+find_youtube_app() {
+    YOUTUBE_PATH=$(find /var/mobile/Applications -name "YouTube.app" 2>/dev/null)
+    if [ -z "$YOUTUBE_PATH" ]; then
+        YOUTUBE_PATH=$(find /var/containers/Bundle/Application -name "YouTube.app" 2>/dev/null)
+    fi
+    echo "$YOUTUBE_PATH"
+}
+
+# Function to fetch the custom version from the plist
+fetch_custom_version() {
+    CUSTOM_VERSION=$(plutil -extract items.1.key xml1 -o - "$PLIST_PATH" | grep '<string>' | sed -e 's/^.*<string>\(.*\)<\/string>.*$/\1/')
+    if [ -z "$CUSTOM_VERSION" ]; then
+        CUSTOM_VERSION="18.18"  # Default version if not set
+    fi
+    echo "Custom version from Root.plist: $CUSTOM_VERSION"
+}
+
+# Function to update the version in YouTube's Info.plist
+update_version_in_plist() {
+    local plist_path="$1"
+    echo "Updating CFBundleVersion to $CUSTOM_VERSION in $plist_path"
+    plutil -replace CFBundleVersion -string "$CUSTOM_VERSION" "$plist_path"
+    plutil -replace CFBundleShortVersionString -string "$CUSTOM_VERSION" "$plist_path"
+}
+
+# Function to start the server
+start_server() {
+    local app_path="$1"
+    if [ -d "$app_path/web" ]; then
+        cd "$app_path/web" || exit
+        export SERVER_ROOT=$(pwd)
+        lighttpd -D -f ./lighttpd.conf &
+        LIGHTTPD_PID=$!
+    fi
+}
+
+# Function to stop the server
+stop_server() {
+    echo "Stopping server..."
+    if [ -n "$LIGHTTPD_PID" ]; then
+        kill "$LIGHTTPD_PID"
+        killall -9 lighttpd
+        echo "Stopped lighttpd (PID: $LIGHTTPD_PID)"
+    fi
+    exit 0
+}
+
+# Function to check for YouTube processes
+check_youtube_processes() {
+    local yt_process_count
+    yt_process_count=$(ps aux | grep -v grep | grep -c "YouTube")
+    echo "YouTube process count: $yt_process_count"
+    if [ "$yt_process_count" -eq 0 ]; then
+        stop_server
+    fi
+}
+
+# Main script execution
+YOUTUBE_APP_PATH=$(find_youtube_app)
+
+if [ -n "$YOUTUBE_APP_PATH" ]; then
+    echo "YouTube.app found at: $YOUTUBE_APP_PATH"
+
+    # Define path to Info.plist
+    INFO_PLIST_PATH="$YOUTUBE_APP_PATH/Info.plist"
+
+    # Fetch the custom version from the Root.plist
+    fetch_custom_version
+
+    # Update the version in Info.plist
+    if [ -f "$INFO_PLIST_PATH" ]; then
+        update_version_in_plist "$INFO_PLIST_PATH"
+    else
+        echo "Info.plist not found!"
+    fi
+
+    # Start the server
+    start_server "$YOUTUBE_APP_PATH"
+
+    # Check every 60 seconds for YouTube process count
+    while true; do
+        check_youtube_processes
+        sleep 60
+    done
+else
+    echo "YouTube.app not found on this device!"
+fi

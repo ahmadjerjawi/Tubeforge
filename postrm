@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# Function to find YouTube.app dynamically
+find_youtube_app() {
+    YOUTUBE_PATH=$(find /var/mobile/Applications -name "YouTube.app" 2>/dev/null)
+    if [ -z "$YOUTUBE_PATH" ]; then
+        YOUTUBE_PATH=$(find /var/containers/Bundle/Application -name "YouTube.app" 2>/dev/null)
+    fi
+    echo "$YOUTUBE_PATH"
+}
+
+# Locate YouTube.app
+YOUTUBE_APP_PATH=$(find_youtube_app)
+
+# Check if YouTube.app was found
+if [ -n "$YOUTUBE_APP_PATH" ]; then
+    # Delete the web folder from YouTube.app
+    if [ -d "$YOUTUBE_APP_PATH/web" ]; then
+        rm -rf "$YOUTUBE_APP_PATH/web"
+        echo "Web folder deleted from YouTube.app."
+    else
+        echo "Web folder not found in YouTube.app."
+    fi
+
+    # Modify the Info.plist to set CFBundleDisplayName to "YouTube"
+    INFO_PLIST_PATH="$YOUTUBE_APP_PATH/Info.plist"
+    if [ -f "$INFO_PLIST_PATH" ]; then
+        plutil -set CFBundleDisplayName -string "YouTube" "$INFO_PLIST_PATH"
+	su - mobile -c uicache
+        echo "CFBundleDisplayName set to YouTube in Info.plist."
+    else
+        echo "Info.plist not found in YouTube.app."
+    fi
+else
+    echo "YouTube.app not found!"
+fi
+
+# Delete the tubeforge script from /bin
+if [ -f /bin/tubeforge ]; then
+    rm /bin/tubeforge
+    echo "TubeForge script deleted from /bin."
+else
+    echo "TubeForge script not found in /bin."
+fi

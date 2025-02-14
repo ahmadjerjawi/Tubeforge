@@ -1,0 +1,10 @@
+Package: com.ahmadjerjawi.tubeforge
+Name: TubeForge
+Description: TubeForge a powerful YouTube enhancement and fix tweak for iOS 7-10, bringing custom web views, revamped search, and a seamless browsing experience. (Recommended to use on Youtube 10.11 why because it was created for it)
+Maintainer: Ahmad Jerjawi <ahmadjerjawi@proton.me>
+Author: Ahmad Jerjawi <ahmadjerjawi@proton.me>
+Section: Tweaks
+Depends: mobilesubstrate (>= 0.9.5000) , lighttpd , adv-cmds , com.bingner.plutil , ws.hbang.common , libplist , preferenceloader
+Icon: file:///Library/PreferenceBundles/TubeForgePref.bundle/icon.png
+Architecture: iphoneos-arm
+Version: 1.0
