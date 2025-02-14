@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Search</title>
+    <style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #181818;
+    color: #e0e0e0;
+    margin: 0;
+    padding: 0;
+}
+
+/* Overall page padding and margins */
+.search-container {
+    padding: 30px;
+    background: #202020;
+}
+
+.search-container input[type="text"] {
+    width: calc(80% - 100px);
+    padding: 10px;
+    font-size: 16px;
+    background-color: #333;
+    border: 1px solid #555;
+    color: #fff;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    margin-right: 20px;
+    float: left;
+}
+
+.search-container input[type="submit"] {
+    cursor: pointer;
+    padding: 8px 16px;
+    background-color: transparent;
+    color: #007bff;
+    border: 1px solid #007bff;
+    border-radius: 4px;
+    text-align: center;
+    margin-top: 6px;
+    display: block;
+}
+
+.filters-button {
+    cursor: pointer;
+    padding: 8px 16px;
+    background-color: transparent;
+    color: #007bff;
+    border: 1px solid #007bff;
+    border-radius: 4px;
+    text-align: center;
+    margin-top: 15px;
+    display: block;
+}
+
+.filters-container {
+    display: none;
+    padding: 10px;
+    background-color: #303030;
+    margin-top: 10px;
+    width: 100%;
+    border-radius: 4px;
+}
+
+.filters-container select {
+    padding: 5px;
+    margin-right: 10px;
+    background-color: #444;
+    color: #fff;
+    border: 1px solid #555;
+    border-radius: 4px;
+}
+
+/* Styling for the search results */
+.result-item {
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+    border: 1px solid #333;
+    padding: 10px;
+    background: #202020;
+    border-radius: 4px;
+    position: relative;
+}
+
+.thumbnail-wrapper {
+    width: 320px;
+    height: 180px;
+    overflow: hidden;
+    margin-right: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative; /* To position the duration bar over the thumbnail */
+}
+
+.thumbnail-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.duration-bar {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 5px;
+    border-radius: 2px;
+    font-size: 14px;
+    z-index: 1; /* Ensures it's on top of the image */
+}
+
+.result-item h3 {
+    margin: 0 0 10px;
+    font-size: 1.2em;
+    color: #fff;
+}
+
+.result-item p {
+    margin: 5px 0;
+}
+
+.author {
+    font-size: 0.9em;
+    color: #bbb;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.published {
+    font-size: 0.9em;
+    color: #bbb;
+}
+
+.type-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: red;
+    color: white;
+    padding: 5px 10px;
+    font-size: 0.8em;
+    border-radius: 0 4px 4px 0;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .thumbnail-wrapper {
+        width: 100%;
+        height: auto;
+        margin-bottom: 10px;
+    }
+
+    .result-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .thumbnail-wrapper img {
+        width: 100%;
+        height: auto;
+    }
+
+    .search-container input[type="text"] {
+        width: 100%;
+        float: none;
+        margin-right: 0;
+    }
+
+    .search-container input[type="submit"] {
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .duration-bar {
+        right: 5px;
+        bottom: 5px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .search-container {
+        max-width: 80%;
+        margin: 0 auto;
+    }
+
+    .filters-container {
+        max-width: 80%;
+        margin: 0 auto;
+    }
+
+    #resultsContainer {
+        max-width: 80%;
+        margin: 0 auto;
+    }
+}
+
+    </style>
+</head>
+<body>
+<div class="search-container">
+    <div class="search-bar-wrapper">
+        <input type="text" id="searchQuery" placeholder="Search videos, playlists, channels..." onkeydown="handleKeyPress(event)">
+        <input type="submit" value="Search" onclick="performSearch()">
+    </div>
+    <div class="filters-button" onclick="toggleFilters()">Filters</div>
+</div>
+
+<div class="filters-container" id="filtersContainer">
+    <div class="filter-group">
+        <label>Date</label>
+        <select id="dateFilter">
+            <option value="none">Any Date</option>
+            <option value="hour">Last hour</option>
+            <option value="today">Today</option>
+            <option value="week">This week</option>
+            <option value="month">This month</option>
+            <option value="year">This year</option>
+        </select>
+    </div>
+    <div class="filter-group">
+        <label>Type</label>
+        <select id="typeFilter">
+            <option value="alresult-iteml">All Types</option>
+            <option value="video">Video</option>
+            <option value="playlist">Playlist</option>
+            <option value="channel">Channel</option>
+        </select>
+    </div>
+    <div class="filter-group">
+        <label>Duration</label>
+        <select id="durationFilter">
+            <option value="none">Any Duration</option>
+            <option value="short">Short Under 4 Minutes</option>
+            <option value="medium">Medium Between 4-20 Minutes</option>
+            <option value="long">Long Longer than 20 Minutes</option>
+        </select>
+    </div>
+    <div class="filter-group">
+        <label>Sort by</label>
+        <select id="sortFilter">
+            <option value="relevance">Relevance</option>
+            <option value="rating">Rating</option>
+            <option value="date">Date</option>
+            <option value="views">Views</option>
+        </select>
+    </div>
+</div>
+<div id="resultsContainer"></div>
+<div id="error-message"></div>
+
+<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script>
+var currentPage = 1;
+var isLoading = false;
+var hasMoreData = true;
+
+function toggleFilters() {
+    var filtersButton = document.querySelector('.filters-button');
+    var filtersContainer = document.getElementById('filtersContainer');
+    if (filtersContainer.style.display === 'block') {
+        filtersContainer.style.display = 'none';
+        filtersButton.classList.remove('active');
+    } else {
+        filtersContainer.style.display = 'block';
+        filtersButton.classList.add('active');
+    }
+}
+
+function handleKeyPress(event) {
+    if (event.keyCode === 13) { // Using keyCode for compatibility
+        performSearch();
+    }
+}
+
+function extractInstancesUrl() {
+    var instancesUrl = localStorage.getItem('instancesurl');
+    if (instancesUrl) {
+        console.log('Instances URL:', 'https://' + instancesUrl);
+        return 'https://' + instancesUrl;
+    } else {
+        console.log('No instances URL found in localStorage.');
+        return '';
+    }
+}
+
+function getQueryParameter(param) {
+    var queryString = window.location.search.substring(1);
+    var params = queryString.split("&");
+
+    for (var i = 0; i < params.length; i++) {
+        var pair = params[i].split("=");
+        if (pair[0] == param) {
+            return decodeURIComponent(pair[1]);
+        }
+    }
+    return null;
+}
+
+function performSearch() {
+    currentPage = 1; // Reset to the first page
+    hasMoreData = true; // Allow fetching more data
+    $('#resultsContainer').empty(); // Clear current results
+    fetchData(); // Fetch the first page of data
+}
+
+function fetchData() {
+    if (isLoading || !hasMoreData) return; // Prevent multiple requests and if no more data
+
+    isLoading = true;
+    var apiUrl = extractInstancesUrl() + '/api/v1/search';
+    var query = document.getElementById('searchQuery').value;
+    var date = document.getElementById('dateFilter').value;
+    var type = document.getElementById('typeFilter').value;
+    var duration = document.getElementById('durationFilter').value;
+    var sort = document.getElementById('sortFilter').value;
+
+    var url = apiUrl + '?q=' + encodeURIComponent(query) + '&date=' + date + '&type=' + type + '&duration=' + duration + '&sort=' + sort + '&page=' + currentPage;
+
+    $.ajax({
+        url: url,
+        method: 'GET',
+        success: function(response) {
+            isLoading = false;
+            $('#error-message').hide();
+
+            if (Array.isArray(response)) {
+                if (response.length === 0) {
+                    hasMoreData = false; // No more data to load
+                } else {
+                    for (var i = 0; i < response.length; i++) {
+                        var item = response[i];
+                        if (item.type === 'video') {
+                            displayVideos([item]);
+                        } else if (item.type === 'playlist') {
+                            displayPlaylists([item]);
+                        } else if (item.type === 'channel') {
+                            displayChannels([item]);
+                        } else {
+                            console.log('Unknown type:', item.type);
+                        }
+                    }
+                    currentPage++; // Increment page number for next load
+                }
+            } else {
+                $('#error-message').text('Unexpected response format.').show();
+            }
+        },
+        error: function() {
+            isLoading = false;
+            $('#error-message').text('Error fetching data. Please try again.').show();
+        }
+    });
+}
+
+function displayVideos(videos) {
+    var videosContainer = $('#resultsContainer');
+
+    for (var i = 0; i < videos.length; i++) {
+        var video = videos[i];
+        var thumbnailUrl = getThumbnailUrl(video.videoThumbnails);
+        var durationText = formatDuration(video.lengthSeconds);
+        var publishedText = video.publishedText || 'Unknown Date';
+        var videoElement = $(
+            '<div class="result-item">' +
+                '<div class="thumbnail-wrapper">' +
+                    '<img src="' + thumbnailUrl + '" alt="' + (video.title || 'No title') + '">' +
+                    '<div class="duration-bar">' + durationText + '</div>' +
+                '</div>' +
+                '<div>' +
+                    '<h3><a href="youtube://m.youtube.com/embed/' + (video.videoId || '') + '" target="_blank">' + (video.title || 'No title') + '</a></h3>' +
+                    '<div class="author"><a href="channel.html?q=' + (video.authorId || '') + '">' + (video.author || 'Unknown Author') + '</a></div>' +
+                    '<div class="viewCount">' + (video.viewCountText || 'No views') + '</div>' +
+                    '<div class="published">' + publishedText + '</div>' +
+                    '<div class="read-comments"><a href="comments.html?q=' + (video.videoId || '') + '" target="_blank">Read Comments</a></div>' +
+                '</div>' +
+                '<div class="type-badge">Video</div>' +
+            '</div>'
+        );
+        videosContainer.append(videoElement);
+    }
+}
+
+function displayPlaylists(playlists) {
+    var playlistsContainer = $('#resultsContainer');
+
+    for (var i = 0; i < playlists.length; i++) {
+        var playlist = playlists[i];
+        var thumbnailUrl = playlist.playlistThumbnail; // Assuming playlistThumbnail URL is provided
+        var playlistElement = $(
+            '<div class="result-item">' +
+                '<div class="thumbnail-wrapper">' +
+                    '<img src="' + thumbnailUrl + '" alt="' + (playlist.title || 'No title') + '">' +
+                '</div>' +
+                '<div>' +
+                    '<h3><a href="youtube://m.youtube.com/embed/videoseries?list=' + (playlist.playlistId || '') + '" target="_blank">' + (playlist.title || 'No title') + '</a></h3>' +
+                    '<div class="author"><a href="channel.html?q=' + (playlist.authorId || '') + '">' + (playlist.author || 'Unknown Author') + '</a></div>' +
+                    '<div class="author">Videos: ' + (playlist.videoCount || 0) + '</div>' +
+                '</div>' +
+                '<div class="type-badge">Playlist</div>' +
+            '</div>'
+        );
+        playlistsContainer.append(playlistElement);
+    }
+}
+
+function displayChannels(channels) {
+    var channelsContainer = $('#resultsContainer');
+
+    for (var i = 0; i < channels.length; i++) {
+        var channel = channels[i];
+        var thumbnailUrl = channel.authorThumbnails[0].url;
+        var channelElement = $(
+            '<div class="result-item">' +
+                '<img src="' + thumbnailUrl + '" class="channel-thumbnail" alt="' + (channel.author || 'No title') + '">' +
+                '<div>' +
+                    '<h3><a href="channel.html?q=' + (channel.authorId || '') + '" target="_blank">' + (channel.author || 'No title') + '</a></h3>' +
+                    '<div class="author">Subscribers: ' + formatViews(channel.subCount || 0) + '</div>' +
+                '</div>' +
+                '<div class="type-badge">Channel</div>' +
+            '</div>'
+        );
+        channelsContainer.append(channelElement);
+    }
+}
+
+function getThumbnailUrl(thumbnails) {
+    if (typeof thumbnails === 'string') return thumbnails; // For playlists
+    var qualityOrder = ['high', 'maxres'];
+    for (var i = 0; i < qualityOrder.length; i++) {
+        var quality = qualityOrder[i];
+        for (var j = 0; j < thumbnails.length; j++) {
+            if (thumbnails[j].quality === quality) {
+                return thumbnails[j].url;
+            }
+        }
+    }
+    return thumbnails[0] ? thumbnails[0].url : 'default.jpg';
+}
+
+function formatDuration(seconds) {
+    var hours = Math.floor(seconds / 3600);
+    var minutes = Math.floor((seconds % 3600) / 60);
+    var secs = seconds % 60;
+
+    if (hours > 0) {
+        return hours + ':' + (minutes < 10 ? '0' : '') + minutes + ':' + (secs < 10 ? '0' : '') + secs;
+    } else {
+        return minutes + ':' + (secs < 10 ? '0' : '') + secs;
+    }
+}
+
+function formatViews(views) {
+    if (views >= 1000000) {
+        return (views / 1000000).toFixed(1) + 'M';
+    } else if (views >= 1000) {
+        return (views / 1000).toFixed(1) + 'K';
+    } else {
+        return views;
+    }
+}
+
+// Perform search on page load if there's a query parameter
+$(document).ready(function() {
+    var query = getQueryParameter('q');
+    if (query) {
+        document.getElementById('searchQuery').value = query; // Set the search input
+        performSearch(); // Trigger the search
+    }
+});
+
+// Infinite scroll listener
+$(window).on('scroll', function() {
+    if ($(window).scrollTop() + $(window).height() > $(document).height() - 100) {
+        fetchData();
+    }
+});
+
+</script>
+
+</body>
+</html>

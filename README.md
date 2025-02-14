@@ -1,40 +1,31 @@
-# TubeForge
+# TubeForge - YouTube Revive for iOS 7-10
+**Note:**
+Due to the emergence of a better solution that utilizes proxying instead of a custom GUI, this project might not meet current expectations. Consider exploring more recent alternatives if you're looking to revive legacy YouTube functionality on older iOS devices.
 
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/86ba4b00-c1d6-4e87-8497-45f0cd15f3fb" alt="favicon" />
-</div>
+**Overview:**
+TubeForge was designed to revive the outdated YouTube app on iOS 7-10 devices by leveraging the Invidious API. The approach involves:
 
-![Best](https://github.com/user-attachments/assets/a1cf3806-1fca-4b1d-bd4b-908dcfe7f839)
+- **Class Hooking:** Intercepting YouTube's native classes and replacing them with locally hosted HTML/PHP pages.
+- **Localhost Pages:** Utilizing the `tubeforge` script to load and display modern web pages inside the YouTube app.
+- **Instance Selection:** Allowing users to choose an Invidious instance (local or public) for fetching content.
 
-# YouTube Revive for iOS 7-10
+**Current Status:**
+- The project is **not maintained** and is likely **not working properly**.
+- While improvements were being developed, a better alternative was released that opts for proxying the content instead of creating a new GUI—this new method is generally considered superior.
+- For further discussions and alternatives, check out the [r/legacyjailbreak](https://www.reddit.com/r/legacyjailbreak) subreddit.
 
-## Project Overview
-This project is my attempt to revive the outdated YouTube app on iOS 7-10 devices. Using the **Invidious API**, I’m injecting a locally hosted page into the YouTube client to bring it back to life. The goal is to replace old YouTube features with modern alternatives, without breaking your ancient iPhone. 🚀
+**Installation (when it was active):**
+1. **Repository Addition:** Add the repo to Cydia: `https://repo.ahmadjerjawi.github.io`
+2. **Package Installation:** Search for and install `tubeforge`.
+3. **Configuration:** After installation and a respring, configure your desired Invidious instance through the tweak’s settings.
 
-### How It Works
-- **Class Hooking**: I’m hooking into YouTube's classes, deleting them, and swapping them with localhost pages.
-- **Localhost Pages**: These pages are fetched using a script called `tubeforge`. This script runs when YouTube launches and locates its bundle. During installation, a folder named `web` it contains HTML and PHP pages that will be displayed in the app.
-- **Instance Selection**: Once installed and respringed , the tweak will allow you to select which Invidious instance to use (or you can host your own, but make sure the API is enabled).
-
-### Requirements
+**Requirements:**
 - iOS 7-10 device
-- **adv-cmds** (to install ps)
-- **PHP**
-- **Cephei**
-- **Lighttpd**
-- **Invidious Insteance** (locally prefered but also can use public)
-- YouTube app (obviously)
-  
-### Installation
-1. Add my repo to **Cydia**: `https://ahmadjerjawi.github.io`
-2. Search for `tubeforge` and install.
-3. Once installed, go to the app’s settings to configure the Invidious instances you want to use.
-
-### Debugging
-Good news, I haven’t removed the debugging lines, so you can still debug as you work with it! 🔧  
-Also, instead of installing directly, you can **compile it from theos to  .deb** file if you prefer doing it that way.
-
-### A Side Project
-This project is something I’m doing on the weekends. Between school and everything else, it’s my hobby project—so don't expect it to be perfect. 😉
+- YouTube App (compatible version)
+- **adv-cmds** (for installing utilities like `ps`)
+- PHP
+- Cephei framework
+- Lighttpd
+- An operational Invidious instance (local or public)
 
 

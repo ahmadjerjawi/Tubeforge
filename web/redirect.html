@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting...</title>
+</head>
+<body>
+    <script>
+        function extractInstancesUrl() {
+            var instancesUrl = localStorage.getItem('instancesurl');
+            if (instancesUrl) {
+                console.log('Instances URL:', 'https://' + instancesUrl);
+                window.location.href = 'https://' + instancesUrl;
+            } else {
+                console.log('No instances URL found in localStorage.');
+                document.body.innerHTML = "<h1>No instances URL found.</h1>";
+            }
+        }
+
+        extractInstancesUrl();
+    </script>
+</body>
+</html>

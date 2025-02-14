@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Channel Page</title>
+    <style>
+/* General Styles (for both small and big screens) */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #121212; /* Dark background */
+    color: #e0e0e0; /* Light text color */
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+#channelInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.author-banner img {
+    width: 100%;
+    height: auto;
+    max-height: 300px; /* Adjust based on your design */
+    object-fit: cover;
+    margin-bottom: 20px;
+}
+
+.author-info {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px;
+}
+
+#authorThumbnail {
+    width: 120px; /* Larger size */
+    height: 120px; /* Larger size */
+    border-radius: 50%; /* Circular shape */
+    margin-right: 20px;
+}
+
+.sidebar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.sidebar button {
+    padding: 10px;
+    margin: 5px;
+    background-color: #1f1f1f; /* Dark button background */
+    color: #e0e0e0; /* Light text color */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.sidebar button:hover {
+    background-color: #333; /* Darker button background on hover */
+}
+
+#sortButtons {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+#sortButtons button {
+    padding: 10px;
+    margin: 5px;
+    background-color: #e53935; /* Red button background */
+    color: #fff; /* White text color */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#sortButtons button:hover {
+    background-color: #b71c1c; /* Darker red button on hover */
+}
+
+#videos, #playlists, #streams, #aboutMe {
+    display: none;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+/* Video/Playlist/Stream Item Styling */
+.video-item, .playlist-item, .stream-item {
+    background: #1e1e1e; /* Dark background for items */
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5); /* Darker shadow */
+    display: flex;
+    align-items: center;
+    position: relative;
+    max-width: 100%; /* Ensure items don't exceed container width */
+    box-sizing: border-box; /* Include padding in width calculations */
+}
+
+.video-item img, .playlist-item img, .stream-item img {
+    width: 100%; /* Adjust to fit within the container */
+    max-width: 320px; /* Limit to prevent oversized thumbnails */
+    height: auto; /* Maintain aspect ratio */
+    margin-right: 15px; /* Space between thumbnail and text */
+    box-sizing: border-box; /* Include padding in width calculations */
+}
+
+.video-item .type, .playlist-item .type, .stream-item .type {
+    width: 50px;
+    height: 20px;
+    background-color: #e53935; /* Red background */
+    color: #fff; /* White text color */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    margin-right: 10px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 12px;
+    /* Make sure this positioning doesn't cause overlap */
+}
+
+.video-item .duration, .stream-item .viewCount {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background-color: rgba(0, 0, 0, 0.7); /* Dark background */
+    color: #fff; /* White text color */
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+
+.playlist-item .videoCount {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background-color: rgba(0, 0, 0, 0.7); /* Dark background */
+    color: #fff; /* White text color */
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+
+#error-message {
+    padding: 10px;
+    color: white;
+    background-color: #e53935; /* Red background */
+    border: 1px solid #b71c1c; /* Darker red border */
+    margin-bottom: 20px;
+    width: 100%;
+    display: none;
+}
+
+#backButton {
+    padding: 10px;
+    background-color: #1f1f1f;
+    color: #e0e0e0;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    display: block;
+    z-index: 1000;
+}
+
+#backButton:hover {
+    background-color: #333;
+}
+
+.error-message {
+    padding: 10px;
+    background-color: #e53935; /* Red background */
+    color: #fff;
+    border-radius: 5px;
+    text-align: center;
+}
+
+/* --- BIG SCREEN STYLING --- */
+@media (min-width: 1024px) {
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #121212;
+        color: #e0e0e0;
+    }
+    .container {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    #channelInfo {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        margin-bottom: 20px;
+        position: relative;
+    }
+    .author-banner img {
+        width: 100%;
+        height: auto;
+        max-height: 300px;
+        object-fit: cover;
+        margin-bottom: 20px;
+    }
+    .author-info {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        max-width: 1200px;
+    }
+    #authorThumbnail {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        margin-right: 20px;
+    }
+    .sidebar {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    .sidebar button {
+        padding: 10px;
+        margin: 5px;
+        background-color: #1f1f1f;
+        color: #e0e0e0;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .sidebar button:hover {
+        background-color: #333;
+    }
+    #sortButtons {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    #sortButtons button {
+        padding: 10px;
+        margin: 5px;
+        background-color: #e53935;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    #sortButtons button:hover {
+        background-color: #b71c1c;
+    }
+    #videos, #playlists, #streams, #aboutMe {
+        display: none;
+        margin-bottom: 20px;
+        width: 100%;
+    }
+}
+
+
+
+    </style>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+</head>
+<body>
+    <button id="backButton" onclick="goBack()">Back</button>
+    <div id="error-message"></div>
+    <div class="container">
+        <div id="channelInfo">
+    <div class="author-banner">
+        <img src="" alt="Author Banner" id="authorBanner">
+    </div>
+    <div class="author-info">
+        <img src="" alt="Author Thumbnail" id="authorThumbnail">
+        <div>
+            <h1 id="authorName"></h1>
+            <div id="subscriberCount"></div>
+            <div id="totalViews"></div>
+        </div>
+    </div>
+</div>
+
+
+        <div class="sidebar">
+            <button onclick="showTab('videos')">Videos</button>
+            <button onclick="showTab('streams')">Streams</button>
+            <button onclick="showTab('playlists')">Playlists</button>
+            <button onclick="showTab('aboutMe')">About Me</button>
+        </div>
+        <div id="sortButtons">
+            <button onclick="sortVideos('newest')">Newest</button>
+            <button onclick="sortVideos('oldest')">Oldest</button>
+            <button onclick="sortVideos('popular')">Popular</button>
+        </div>
+        <div id="videos"></div>
+        <div id="playlists"></div>
+        <div id="streams"></div>
+        <div id="aboutMe"></div>
+    </div>
+
+
+<script>
+        function extractInstancesUrl() {
+            var instancesUrl = localStorage.getItem('instancesurl');
+            if (instancesUrl) {
+                console.log('Instances URL:', 'https://' + instancesUrl);
+                return 'https://' + instancesUrl; // Prepend 'https://' and return the URL
+            } else {
+                console.log('No instances URL found in localStorage.');
+            }
+        }
+
+        var baseUrl = extractInstancesUrl();
+        var channelId = getUrlParameter('q') || '';
+        var currentSortOrder = 'newest'; // Default filter state
+        var nextPageToken = '';
+        var previousTab = 'videos'; // Track the previous tab
+
+        $(document).ready(function() {
+            if (!channelId) {
+                displayError('There isn\'t a channel ID');
+                return;
+            }
+            preloadAllContent(channelId);
+            showTab('videos'); // Automatically show the "Videos" tab on load
+        });
+
+        function getUrlParameter(name) {
+            var regex = new RegExp('[?&]' + name + '=([^&]*)');
+            var results = regex.exec(window.location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+function preloadAllContent(channelId) {
+    var channelUrl = baseUrl + '/api/v1/channels/' + channelId;
+    var playlistsUrl = baseUrl + '/api/v1/channels/' + channelId + '/playlists';
+    var streamsUrl = baseUrl + '/api/v1/channels/' + channelId + '/streams';
+    var videosUrl = baseUrl + '/api/v1/channels/' + channelId + '/videos';
+
+    // Load Channel Info
+    $.get(channelUrl, function(data) {
+        displayChannelInfo(data);
+        displayAboutMe(data);
+    }).fail(function() {
+        displayError('This channel does not exist or has been terminated.');
+    });
+
+    // Load Videos
+    $.get(videosUrl, function(data) {
+        if (data && data.videos && data.videos.length) {
+            displayVideos(data.videos);
+            nextPageToken = data.continuation;
+            $('#loadMoreButton').toggle(!!nextPageToken);
+        } else {
+            $('#videos').html('<div class="error-message">No videos found.</div>');
+        }
+    }).fail(function() {
+        console.error('Failed to fetch videos');
+    });
+
+    // Load Playlists
+    $.get(playlistsUrl, function(data) {
+        if (data && data.playlists && data.playlists.length) {
+            displayPlaylists(data.playlists);
+        } else {
+            $('#playlists').html('<div class="error-message">No playlists found.</div>');
+        }
+    }).fail(function() {
+        console.error('Failed to fetch playlists');
+    });
+
+    // Load Streams
+    $.get(streamsUrl, function(data) {
+        if (data && data.videos && data.videos.length) {
+            displayStreams(data);
+        } else {
+            $('#streams').html('<div class="error-message">No streams found.</div>');
+        }
+    }).fail(function() {
+        console.error('Failed to fetch streams');
+    });
+}
+
+function formatNumber(number) {
+    if (number >= 1000000000) {
+        return (number / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
+    } else if (number >= 1000000) {
+        return (number / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    } else if (number >= 1000) {
+        return (number / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+    } else {
+        return number;
+    }
+}
+
+function displayChannelInfo(data) {
+    $('#authorBanner').attr('src', (data.authorBanners[0] && data.authorBanners[0].url) || 'default-banner.jpg');
+    $('#authorThumbnail').attr('src', (data.authorThumbnails[4] && data.authorThumbnails[4].url) || 'default-thumbnail.jpg');
+    $('#authorName').text(data.author || 'Unknown Author');
+    $('#subscriberCount').text('Subscribers: ' + formatNumber(data.subCount || 0));
+}
+
+        function displayVideos(videos) {
+            var videosContainer = $('#videos');
+            videosContainer.empty();
+
+            videos.forEach(function(video) {
+                var videoElement = $(
+                    '<div class="video-item">' +
+                        '<img src="' + ((video.videoThumbnails[3] && video.videoThumbnails[3].url) || 'default.jpg') + '" alt="' + (video.title || 'No title') + '">' +
+                        '<div>' +
+                            '<h3><a href="youtube://m.youtube.com/embed/' + (video.videoId || '') + '" target="_blank">' + (video.title || 'No title') + '</a></h3>' +
+                            '<div class="type">Video</div>' +
+                            '<div class="viewCount">' + (video.viewCountText || 'No views') + '</div>' +
+			'<div class="published">' + (video.publishedText || '') +  '</div>' +
+                            '<div class="authorId">By: <a href="channel.html?q=' + (video.authorId || '') + '" target="_blank">' + (video.author || 'Unknown') + '</a></div>' +
+			'<div class="read-comments"><a href="comments.html?q=' + (video.videoId || '') + '" target="_blank">Read Comments</a></div>' +
+                            '<div class="duration">' + formatDuration(video.lengthSeconds || 0) + '</div>' +
+                        '</div>' +
+                    '</div>'
+                );
+                videosContainer.append(videoElement);
+            });
+        }
+
+        function displayPlaylists(playlists) {
+            var playlistsContainer = $('#playlists');
+            playlistsContainer.empty();
+
+            playlists.forEach(function(playlist) {
+                var playlistElement = $(
+                    '<div class="playlist-item">' +
+                        (playlist.playlistThumbnail ? '<img src="' + playlist.playlistThumbnail + '" alt="' + playlist.title + '">' : '') +
+                        '<div>' +
+                            '<h3><a href="youtube://m.youtube.com/embed/videoseries?list=' + (playlist.playlistId || '') + '" target="_blank">' + (playlist.title || 'No title') + '</a></h3>' +
+                            '<div class="type">Playlist</div>' +
+			'<div class="author"><a href="channel.html?q=' + (playlist.authorId || '') + '">' + (playlist.author || 'Unknown Author') + '</a></div>' +
+			'<div class="author">' + (playlist.viewCount || 0) + '</div>' +
+                            '<div class="videoCount">' + (playlist.videoCount || '0') + ' Videos</div>' +
+                        '</div>' +
+                    '</div>'
+                );
+                playlistsContainer.append(playlistElement);
+            });
+        }
+
+        function displayStreams(streams) {
+            var streamsContainer = $('#streams');
+            streamsContainer.empty();
+
+            streams.videos.forEach(function(stream) {
+                var streamElement = $(
+                    '<div class="stream-item">' +
+                        (stream.videoThumbnails.length ? '<img src="' + stream.videoThumbnails[0].url + '" alt="' + (stream.title || 'No title') + '">' : '') +
+                        '<div>' +
+                            '<h3><a href="youtube://m.youtube.com/embed/' + (stream.videoId || '') + '" target="_blank">' + (stream.title || 'No title') + '</a></h3>' +
+                            '<div class="type">Stream</div>' +
+                            '<div class="viewCount">' + formatDuration(stream.lengthSeconds || 0) + '</div>' +
+                            '<div class="duration">' + (stream.viewCountText|| 'No views') + '</div>' +
+                            '<div class="authorId">By: <a href="channel.html?q=' + (stream.authorId || '') + '" target="_blank">' + (stream.author || 'Unknown') + '</a></div>' +
+			'<div class="read-comments"><a href="comments.html?q=' + (stream.videoId || '') + '" target="_blank">Read Comments</a></div>' +
+                        '</div>' +
+                    '</div>'
+                );
+                streamsContainer.append(streamElement);
+            });
+        }
+
+        function displayAboutMe(data) {
+            $('#aboutMe').html(
+                '<p>' + (data.descriptionHtml || data.description || 'No description available.') + '</p>'
+            );
+        }
+
+        function formatDuration(seconds) {
+            var hours = Math.floor(seconds / 3600);
+            var minutes = Math.floor((seconds % 3600) / 60);
+            var remainingSeconds = seconds % 60;
+
+            if (hours > 0) {
+                return hours + ':' + (minutes < 10 ? '0' : '') + minutes + ':' + (remainingSeconds < 10 ? '0' : '') + remainingSeconds;
+            } else {
+                return minutes + ':' + (remainingSeconds < 10 ? '0' : '') + remainingSeconds;
+            }
+        }
+
+        function showTab(tabId) {
+            $('#videos, #playlists, #streams, #aboutMe').hide();
+            $('#' + tabId).show();
+            previousTab = tabId; // Update previous tab
+        }
+
+        function sortVideos(order) {
+            currentSortOrder = order; // Update the current filter state
+            var tab = previousTab; // Get the current tab
+
+            // Adjust the URL based on the selected tab and filter
+            var url = baseUrl + '/api/v1/channels/' + channelId + '/' + tab + '?sort_by=' + order;
+
+            $.get(url, function(data) {
+                if (data && data.videos) {
+                    if (tab === 'videos') {
+                        displayVideos(data.videos);
+                    } else if (tab === 'streams') {
+                        displayStreams(data);
+                    }
+                    nextPageToken = data.continuation;
+                    $('#loadMoreButton').toggle(!!nextPageToken);
+                } else {
+                    console.error('No sorted data found');
+                }
+            }).fail(function() {
+                displayError('Failed to fetch sorted data');
+            });
+        }
+	// Infinite scroll listener
+$(window).on('scroll', function() {
+    if ($(window).scrollTop() + $(window).height() > $(document).height() - 100) {
+        loadMore(); // Call the loadMore function when scrolled near the bottom
+    }
+});
+
+function loadMore() {
+    if (!nextPageToken) return;
+
+    var tab = previousTab; // Get the current tab
+
+    // Use the current filter state in the URL
+    var url = baseUrl + '/api/v1/channels/' + channelId + '/' + tab + '?sort_by=' + currentSortOrder + '&continuation=' + nextPageToken;
+
+    $.get(url, function(data) {
+        if (data && data.videos) {
+            // Instead of replacing, we append the new data
+            if (tab === 'videos') {
+                appendVideos(data.videos); // Append the new videos
+            } else if (tab === 'streams') {
+                appendStreams(data.videos); // Append new streams
+            } else if (tab === 'playlists') {
+                appendPlaylists(data.playlists); // Append new playlists
+            }
+            nextPageToken = data.continuation; // Update the token for the next call
+        } else {
+            console.error('No more data found');
+        }
+    }).fail(function() {
+        displayError('Failed to fetch more data');
+    });
+}
+
+// Append functions that add new content under the existing one
+function appendVideos(videos) {
+    var videosContainer = $('#videos'); // Get the current videos container
+    videos.forEach(function(video) {
+        var videoElement = $(
+            '<div class="video-item">' +
+                '<img src="' + ((video.videoThumbnails[3] && video.videoThumbnails[3].url) || 'default.jpg') + '" alt="' + (video.title || 'No title') + '">' +
+                '<div>' +
+                    '<h3><a href="youtube://m.youtube.com/embed/' + (video.videoId || '') + '" target="_blank">' + (video.title || 'No title') + '</a></h3>' +
+                    '<div class="type">Video</div>' +
+                    '<div class="viewCount">' + (video.viewCountText || 'No views') + '</div>' +
+                    '<div class="published">' + (video.publishedText || '') + '</div>' +
+                    '<div class="authorId">By: <a href="channel.html?q=' + (video.authorId || '') + '" target="_blank">' + (video.author || 'Unknown') + '</a></div>' +
+                    '<div class="read-comments"><a href="comments.html?q=' + (video.videoId || '') + '" target="_blank">Read Comments</a></div>' +
+                    '<div class="duration">' + formatDuration(video.lengthSeconds || 0) + '</div>' +
+                '</div>' +
+            '</div>'
+        );
+        videosContainer.append(videoElement); // Append each new video to the container
+    });
+}
+
+function appendStreams(streams) {
+    var streamsContainer = $('#streams');
+    streams.forEach(function(stream) {
+        var streamElement = $(
+            '<div class="stream-item">' +
+                (stream.videoThumbnails.length ? '<img src="' + stream.videoThumbnails[0].url + '" alt="' + (stream.title || 'No title') + '">' : '') +
+                '<div>' +
+                    '<h3><a href="youtube://m.youtube.com/embed/' + (stream.videoId || '') + '" target="_blank">' + (stream.title || 'No title') + '</a></h3>' +
+                    '<div class="type">Stream</div>' +
+                    '<div class="viewCount">' + formatDuration(stream.lengthSeconds || 0) + '</div>' +
+                    '<div class="duration">' + (stream.viewCountText|| 'No views') + '</div>' +
+                    '<div class="authorId">By: <a href="channel.html?q=' + (stream.authorId || '') + '" target="_blank">' + (stream.author || 'Unknown') + '</a></div>' +
+                    '<div class="read-comments"><a href="comments.html?q=' + (stream.videoId || '') + '" target="_blank">Read Comments</a></div>' +
+                '</div>' +
+            '</div>'
+        );
+        streamsContainer.append(streamElement);
+    });
+}
+
+function appendPlaylists(playlists) {
+    var playlistsContainer = $('#playlists');
+    playlists.forEach(function(playlist) {
+        var playlistElement = $(
+            '<div class="playlist-item">' +
+                (playlist.playlistThumbnail ? '<img src="' + playlist.playlistThumbnail + '" alt="' + playlist.title + '">' : '') +
+                '<div>' +
+                    '<h3><a href="youtube://m.youtube.com/embed/videoseries?list=' + (playlist.playlistId || '') + '" target="_blank">' + (playlist.title || 'No title') + '</a></h3>' +
+                    '<div class="type">Playlist</div>' +
+                    '<div class="author"><a href="channel.html?q=' + (playlist.authorId || '') + '">' + (playlist.author || 'Unknown Author') + '</a></div>' +
+                    '<div class="videoCount">' + (playlist.videoCount || '0') + ' Videos</div>' +
+                '</div>' +
+            '</div>'
+        );
+        playlistsContainer.append(playlistElement);
+    });
+}
+	function goBack() {
+            window.history.back(); // Navigate back to the previous page
+        }
+
+        function displayError(message) {
+            $('#error-message').text(message).show();
+            $('#backButton').show();
+	}
+</script>
+
+</body>
+</html>

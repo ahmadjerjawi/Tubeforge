@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home page</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #181818;
+        color: #e0e0e0;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100vh; /* Ensures the body takes full viewport height */
+    }
+
+    .category-container {
+        background: #202020;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        box-sizing: border-box;
+        width: 100%;
+        position: relative;
+    }
+
+    .category-buttons {
+        display: flex;
+        margin: 0;
+        flex: 1;
+        align-items: center;
+    }
+
+    .category-buttons button {
+        cursor: pointer;
+        padding: 8px 16px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        margin: 0 5px;
+        font-size: 14px;
+        text-align: center;
+    }
+
+    .category-buttons button.active {
+        background-color: #0056b3;
+    }
+
+    .subs-btn,
+    .playlist-btn {
+        cursor: pointer;
+        padding: 8px 16px;
+        background-color: #28a745;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        margin: 5px;
+        font-size: 14px;
+    }
+
+    .subs-btn:hover,
+    .playlist-btn:hover {
+        background-color: #218838;
+    }
+
+    #resultsContainer {
+        padding: 20px;
+        flex: 1;
+        overflow-y: auto; /* Adds scrollbar if content overflows */
+    }
+
+    .result-item {
+        display: flex;
+        align-items: flex-start;
+        width: 100%;
+        box-sizing: border-box;
+        margin-bottom: 20px;
+        border: 1px solid #333;
+        padding: 10px;
+        background: #202020;
+        border-radius: 4px;
+        position: relative;
+    }
+
+    .thumbnail-wrapper {
+        width: 320px;
+        height: 180px;
+        overflow: hidden;
+        margin-right: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .thumbnail-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .duration-bar {
+        position: absolute;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        padding: 5px;
+        border-radius: 2px;
+        bottom: 5px;
+        left: 5px;
+        font-size: 14px;
+    }
+
+    .result-item h3 {
+        margin: 0 0 10px;
+        font-size: 1.2em;
+        color: #fff;
+    }
+
+    .result-item p {
+        margin: 5px 0;
+    }
+
+    .author {
+        font-size: 0.9em;
+        color: #bbb;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+
+    .published {
+        font-size: 0.9em;
+        color: #bbb;
+    }
+
+    .views {
+        font-size: 0.9em;
+        color: #bbb;
+    }
+
+    .type-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: red;
+        color: white;
+        padding: 5px 10px;
+        font-size: 0.8em;
+        border-radius: 0 4px 4px 0;
+    }
+
+    .comments-link {
+        margin-top: 10px;
+        color: #007bff;
+        cursor: pointer;
+        text-decoration: underline;
+        font-size: 14px;
+    }
+
+    #error-message {
+        color: red;
+        margin-top: 10px;
+    }
+</style>
+</head>
+
+<body>
+    <div class="category-container">
+        <div class="category-buttons">
+            <button onclick="getTrending('gaming')">Gaming</button>
+            <button onclick="getTrending('music')">Music</button>
+            <button onclick="getTrending('movies')">Movies</button>
+            <button onclick="getPopular()">Popular</button>
+            <button onclick="getTrending('default')">Trending</button>
+        </div>
+        <button class="subs-btn" onclick="getSubscriptions()">Subscriptions</button>
+        <button class="playlist-btn" onclick="getPlaylists()">Playlists</button>
+    </div>
+
+    <div id="resultsContainer"></div>
+    <div id="error-message"></div>
+
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script>
+    var currentPage = 1;
+    var isLoading = false;
+    var hasMoreData = true;
+    var currentCategory = "default";
+
+    function extractInstancesUrl() {
+        var instancesUrl = localStorage.getItem('instancesurl');
+        if (instancesUrl) {
+            return 'https://' + instancesUrl;
+        } else {
+            return '';
+        }
+    }
+
+    function extractTokenApi() {
+        var token = localStorage.getItem('tokenapi');
+        if (token) {
+            return token;
+        } else {
+            return '';
+        }
+    }
+
+    $(document).ready(function () {
+        getTrending(currentCategory);
+    });
+
+    function getTrending(type) {
+        currentCategory = type;
+        currentPage = 1;
+        hasMoreData = true;
+        $('#resultsContainer').empty();
+        fetchDataTrending();
+    }
+
+    function getPopular() {
+        currentCategory = "popular";
+        currentPage = 1;
+        hasMoreData = true;
+        $('#resultsContainer').empty();
+        fetchDataPopular();
+    }
+
+    function fetchDataTrending() {
+        if (isLoading || !hasMoreData) return;
+
+        isLoading = true;
+        var apiUrl = extractInstancesUrl() + '/api/v1/trending?type=' + currentCategory + '&page=' + currentPage;
+        $.ajax({
+            url: apiUrl,
+            method: 'GET',
+            success: function (response) {
+                isLoading = false;
+                $('#error-message').hide();
+                if (Array.isArray(response)) {
+                    if (response.length === 0) {
+                        hasMoreData = false;
+                    } else {
+                        displayVideos(response);
+                        currentPage++;
+                    }
+                } else {
+                    $('#error-message').text('Unexpected response format.').show();
+                }
+            },
+            error: function () {
+                isLoading = false;
+                $('#error-message').text('Error fetching data. Please try again.').show();
+            }
+        });
+    }
+
+    function fetchDataPopular() {
+        if (isLoading || !hasMoreData) return;
+
+        isLoading = true;
+        var apiUrl = extractInstancesUrl() + '/api/v1/popular?page=' + currentPage;
+        $.ajax({
+            url: apiUrl,
+            method: 'GET',
+            success: function (response) {
+                isLoading = false;
+                $('#error-message').hide();
+                if (Array.isArray(response)) {
+                    if (response.length === 0) {
+                        hasMoreData = false;
+                    } else {
+                        displayVideos(response);
+                        currentPage++;
+                    }
+                } else {
+                    $('#error-message').text('Unexpected response format.').show();
+                }
+            },
+            error: function () {
+                isLoading = false;
+                $('#error-message').text('Error fetching data. Please try again.').show();
+            }
+        });
+    }
+
+    function getSubscriptions() {
+        var apiUrl = extractInstancesUrl() + '/api/v1/auth/subscriptions';
+        var token = extractTokenApi();
+        $.ajax({
+            url: 'proxy.php', // Use PHP proxy
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + token
+            },
+            data: {
+                method: 'GET',
+                cors: apiUrl
+            },
+            success: function (response) {
+                $('#resultsContainer').empty();
+                displayVideos(response);
+            },
+            error: function () {
+                $('#error-message').text('Failed to load subscriptions. Please check your token or login.').show();
+            }
+        });
+    }
+
+    function getPlaylists() {
+        var apiUrl = extractInstancesUrl() + '/api/v1/auth/playlists';
+        var token = extractTokenApi();
+        $.ajax({
+            url: 'proxy.php', // Use PHP proxy
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + token
+            },
+            data: {
+                method: 'GET',
+                cors: apiUrl
+            },
+            success: function (response) {
+                $('#resultsContainer').empty();
+                displayVideos(response);
+            },
+            error: function () {
+                $('#error-message').text('Failed to load playlists. Please check your token or login.').show();
+            }
+        });
+    }
+
+    function displayVideos(videos) {
+        var videosContainer = $('#resultsContainer');
+        for (var i = 0; i < videos.length; i++) {
+            var video = videos[i];
+            var thumbnailUrl = getThumbnailUrl(video.videoThumbnails);
+            var durationText = formatDuration(video.lengthSeconds);
+            var publishedText = video.publishedText || 'Unknown Date';
+            var viewsCount = video.viewCount ? video.viewCount + ' views' : 'No views';
+            var videoElement = $(
+                '<div class="result-item">' +
+                '<div class="thumbnail-wrapper">' +
+                '<img src="' + thumbnailUrl + '" alt="' + (video.title || 'Video thumbnail') + '">' +
+                '<div class="duration-bar">' + durationText + '</div>' +
+                '</div>' +
+                '<div>' +
+                '<h3>' + video.title + '</h3>' +
+                '<p class="author"><a href="channel.html?q=' + video.authorId + '">' + video.author + '</a></p>' +
+                '<p class="published">' + publishedText + '</p>' +
+                '<p class="views">' + formatViews(video.viewCount) + ' Views </p>' +
+                '<a class="comments-link" onclick="redirectToComments(\'' + video.videoId + '\')">Read Comments</a>' +
+                '</div>' +
+                '</div>'
+            );
+            videosContainer.append(videoElement);
+        }
+    }
+
+    function redirectToComments(videoId) {
+        window.location.href = 'comments.html?q=' + videoId;
+    }
+
+    function getThumbnailUrl(thumbnails) {
+        if (thumbnails && thumbnails.length > 0) {
+            return thumbnails[0].url;
+        }
+        return 'default-thumbnail.jpg'; // Fallback in case of missing thumbnails
+    }
+
+    function formatDuration(seconds) {
+        var minutes = Math.floor(seconds / 60);
+        var secs = seconds % 60;
+        if (minutes < 60) {
+            return minutes + ':' + (secs < 10 ? '0' : '') + secs;
+        } else {
+            var hours = Math.floor(minutes / 60);
+            minutes = minutes % 60;
+            return hours + ':' + (minutes < 10 ? '0' : '') + minutes + ':' + (secs < 10 ? '0' : '') + secs;
+        }
+    }
+        function formatViews(views) {
+        if (views >= 1000000) {
+            return (views / 1000000).toFixed(1) + 'M';
+        } else if (views >= 1000) {
+            return (views / 1000).toFixed(1) + 'K';
+        } else {
+            return views;
+        }
+    }
+
+
+
+    $(window).on('scroll', function () {
+        if ($(window).scrollTop() + $(window).height() > $(document).height() - 100) {
+            if (currentCategory === "popular") {
+                fetchDataPopular();
+            } else {
+                fetchDataTrending();
+            }
+        }
+    });
+</script>
+
+</body>
+
+</html>

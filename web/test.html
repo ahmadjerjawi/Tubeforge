@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iOS 7 API Example</title>
+</head>
+<body>
+
+<script>
+    function extractInstancesUrl() {
+        var instancesUrl = localStorage.getItem('instancesurl');
+        return instancesUrl ? 'https://' + instancesUrl : '';
+    }
+
+    function extractInstancesToken() {
+        var tokenapi = localStorage.getItem('tokenapi');
+        return tokenapi ? tokenapi : '';
+    }
+
+    async function makeRequests() {
+        var apiUrl = extractInstancesUrl();
+        var token = extractInstancesToken();
+
+        if (!apiUrl || !token) {
+            console.error('API URL or token is missing. Please check your configuration.');
+            return;
+        }
+
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+
+        // Function to fetch data
+        async function fetchData(endpoint) {
+            const response = await fetch("proxy.php", {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({
+                    cors: apiUrl + endpoint,
+                    method: 'GET',
+                    Authorization: 'Bearer ' + token
+                })
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Error:', errorText);
+                return null; // or handle errors as needed
+            }
+
+            return await response.json();
+        }
+
+        // Fetch video history
+        const historyResponse = await fetchData('/api/v1/auth/history');
+        console.log('Video History Response:', historyResponse);
+
+        // Fetch user preferences
+        const prefsResponse = await fetchData('/api/v1/auth/preferences');
+        console.log('User Preferences Response:', prefsResponse);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        makeRequests();
+    });
+</script>
+
+</body>
+</html>

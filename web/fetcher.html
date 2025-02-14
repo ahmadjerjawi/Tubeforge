@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Invidious Instance</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        #container {
+            width: 300px; /* Reduced width */
+            padding: 20px;
+            background: #1e1e1e;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+            margin: 0; /* Aligns everything to the left */
+        }
+
+        h1 {
+            font-size: 22px;
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border: 1px solid #333;
+            text-align: left;
+            color: #e0e0e0;
+            font-size: 14px; /* Reduced font size */
+        }
+
+        th {
+            background-color: #2c2c2c;
+        }
+
+        tr:nth-child(even) {
+            background-color: #2a2a2a;
+        }
+
+        tr:nth-child(odd) {
+            background-color: #1e1e1e;
+        }
+
+        .button {
+            padding: 8px 12px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            text-align: center;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+
+        .selected {
+            background-color: #4caf50;
+            color: #ffffff;
+        }
+
+        .error {
+            color: #ff5252;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <h1>Select the Fastest Invidious Instance</h1>
+        <table id="instancesTable">
+            <thead>
+                <tr>
+                    <th>Instance URL</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Instances will be dynamically inserted here -->
+            </tbody>
+        </table>
+        <button id="saveButton" class="button">Save</button>
+        <button id="cancelButton" class="button">Cancel</button>
+        <p id="statusMessage" class="error"></p>
+    </div>
+
+    <!-- Include polyfill for older browsers -->
+    <script src="https://cdn.jsdelivr.net/npm/es5-shim/es5-shim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/es5-shim/es5-sham.min.js"></script>
+
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var filesListUrl = 'https://api.github.com/repos/ahmadjerjawi/Invidious-list/contents/output';
+            var apiPath = '/api/v1/stats';
+            var timeout = 3000; // Timeout for requests (3 seconds)
+
+            function fetchFiles() {
+                $.get(filesListUrl, function (data) {
+                    var fileUrls = [];
+                    for (var i = 0; i < data.length; i++) {
+                        if (data[i].type === 'file' && data[i].name.indexOf('.txt') !== -1) {
+                            fileUrls.push(data[i].download_url);
+                        }
+                    }
+                    fetchInstancesFromFiles(fileUrls);
+                }).fail(function () {
+                    $('#statusMessage').text('Failed to fetch file list from GitHub.');
+                });
+            }
+
+            function fetchInstancesFromFiles(fileUrls) {
+                var tableBody = $('#instancesTable tbody');
+                tableBody.empty();
+                var requestsCompleted = 0;
+                var fastestUrl = '';
+                var fastestTime = Infinity;
+
+                for (var i = 0; i < fileUrls.length; i++) {
+                    (function (fileUrl) {
+                        $.get(fileUrl, function (data) {
+                            var urls = data.split('\n').filter(function (url) {
+                                return url.trim() !== '';
+                            });
+                            testInstanceUrls(urls);
+                        }).fail(function () {
+                            $('#statusMessage').text('Failed to fetch file contents.');
+                        });
+                    })(fileUrls[i]);
+                }
+            }
+
+            function testInstanceUrls(urls) {
+                var tableBody = $('#instancesTable tbody');
+                tableBody.empty();
+                var requestsCompleted = 0;
+                var fastestUrl = '';
+                var fastestTime = Infinity;
+
+                for (var i = 0; i < urls.length; i++) {
+                    (function (url) {
+                        var fullUrl = 'https://' + url.trim() + apiPath;
+                        var startTime = new Date().getTime();
+
+                        $.ajax({
+                            url: fullUrl,
+                            method: 'GET',
+                            timeout: timeout,
+                            success: function () {
+                                var responseTime = new Date().getTime() - startTime;
+                                if (responseTime < fastestTime) {
+                                    fastestTime = responseTime;
+                                    fastestUrl = url.trim();
+                                }
+                                var row = '<tr data-url="' + url.trim() + '"><td>' + url.trim() + '</td><td>Online (' + responseTime + ' ms)</td><td><button class="button selectButton">Select</button></td></tr>';
+                                tableBody.append(row);
+                            },
+                            error: function () {
+                                // Remove row if the request fails
+                                $('#instancesTable tbody tr[data-url="' + url.trim() + '"]').remove();
+                            },
+                            complete: function () {
+                                requestsCompleted++;
+                                if (requestsCompleted === urls.length) {
+                                    highlightFastest(fastestUrl);
+                                }
+                            }
+                        });
+                    })(urls[i]);
+                }
+            }
+
+            function highlightFastest(fastestUrl) {
+                $('#instancesTable tbody tr').each(function () {
+                    var url = $(this).data('url');
+                    if (url === fastestUrl) {
+                        $(this).find('.selectButton').addClass('selected');
+                    }
+                });
+            }
+
+            function saveSelectedInstance() {
+                var selectedRow = $('#instancesTable tbody tr').find('.selectButton.selected').closest('tr');
+                var url = selectedRow.data('url');
+                if (url) {
+                    localStorage.setItem('instancesurl', url);
+                    window.location.href = 'menu.html'; // Redirect to menu.html after saving
+                } else {
+                    $('#statusMessage').text('No instance selected.');
+                }
+            }
+
+            $('#saveButton').click(saveSelectedInstance);
+
+            $('#cancelButton').click(function () {
+                window.location.href = 'menu.html'; // Redirect to menu.html on cancel
+            });
+
+            fetchFiles();
+        });
+    </script>
+</body>
+
+</html>

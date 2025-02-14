@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Comments</title>
+		<style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #181818;
+                color: #e0e0e0;
+                margin: 0;
+                padding: 0;
+            }
+
+            .nav-buttons {
+                position: fixed;
+                top: 10px;
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                padding: 0 20px;
+                z-index: 100;
+            }
+
+            .nav-buttons button {
+                background-color: #007bff;
+                border: none;
+                color: white;
+                padding: 10px;
+                cursor: pointer;
+                border-radius: 4px;
+            }
+
+            .nav-buttons button.back-button {
+                background-color: #555;
+            }
+
+            .filters {
+                padding: 20px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                background: #202020;
+                border-bottom: 1px solid #333;
+                margin-top: 20px;
+            }
+
+            /* Ensure enough space for containers below the nav-buttons */
+            .channel-tab {
+                padding: 20px;
+                background-color: #202020;
+                border: 1px solid #333;
+                border-radius: 4px;
+                margin-bottom: 20px;
+                margin-top: 80px; /* Adds space under the fixed nav buttons */
+            }
+
+            .video-description {
+                padding: 20px;
+                background-color: #202020;
+                border: 1px solid #333;
+                border-radius: 4px;
+                margin-bottom: 20px;
+                margin-top: 20px; /* Adds space below the channel-tab */
+            }
+
+            .filters select,
+            .filters button {
+                background-color: #007bff;
+                border: none;
+                color: white;
+                padding: 10px;
+                cursor: pointer;
+                border-radius: 4px;
+                margin-right: 10px;
+            }
+
+            .filters select {
+                font-size: 16px;
+            }
+
+            .error-message {
+                background-color: red;
+                color: white;
+                padding: 10px;
+                text-align: center;
+                margin: 20px;
+                border-radius: 4px;
+            }
+
+            .search-container {
+                padding: 20px;
+                text-align: center;
+            }
+
+            .search-container input[type="text"] {
+                width: 80%;
+                padding: 10px;
+                font-size: 16px;
+                background-color: #333;
+                border: 1px solid #555;
+                color: #fff;
+                border-radius: 4px;
+            }
+
+            .search-container input[type="submit"] {
+                padding: 10px 20px;
+                background-color: #007bff;
+                border: none;
+                color: white;
+                cursor: pointer;
+                border-radius: 4px;
+            }
+
+            .result-item {
+                margin: 20px;
+                padding: 10px;
+                background: #202020;
+                border: 1px solid #333;
+                border-radius: 4px;
+                position: relative;
+            }
+
+            .comment-author {
+                font-weight: bold;
+                display: flex;
+                align-items: center;
+            }
+
+            .comment-author img {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                margin-right: 10px;
+                object-fit: cover;
+            }
+
+            .comment-content {
+                margin-top: 5px;
+            }
+
+            .comment-time {
+                font-size: 0.9em;
+                color: #bbb;
+            }
+
+            .comment-stats {
+                margin-top: 10px;
+                font-size: 0.9em;
+                color: #bbb;
+            }
+
+            .comment-stats span {
+                margin-right: 10px;
+            }
+
+            .favorite {
+                color: gold;
+                font-weight: bold;
+            }
+
+            .pinned {
+                color: red;
+                font-weight: bold;
+            }
+
+            .verified {
+                color: #1e90ff;
+                font-weight: bold;
+            }
+
+            .replies-container {
+                margin-top: 10px;
+                margin-left: 20px;
+                display: none;
+            }
+
+            .reply-button {
+                cursor: pointer;
+                background-color: #007bff;
+                border: none;
+                color: white;
+                padding: 5px;
+                border-radius: 4px;
+                font-size: 0.9em;
+            }
+
+            .hide-replies-button {
+                cursor: pointer;
+                background-color: #dc3545;
+                border: none;
+                color: white;
+                padding: 5px;
+                border-radius: 4px;
+                font-size: 0.9em;
+                margin-left: 10px;
+            }
+
+            .reply {
+                margin-top: 10px;
+                padding: 10px;
+                background: #303030;
+                border: 1px solid #444;
+                border-radius: 4px;
+            }
+
+            .reply-content {
+                margin-top: 5px;
+            }
+
+            .reply-author {
+                font-weight: bold;
+                display: flex;
+                align-items: center;
+            }
+
+            .reply-author img {
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                margin-right: 8px;
+                object-fit: cover;
+            }
+
+            .load-more-button,
+            .load-comments-button {
+                display: block;
+                margin: 20px auto;
+                padding: 10px;
+                border: none;
+                color: white;
+                cursor: pointer;
+                border-radius: 4px;
+            }
+
+            .load-more-button {
+                background-color: #007bff;
+            }
+
+            .load-comments-button {
+                background-color: #28a745;
+            }
+		</style>
+	</head>
+	<body>
+		<div class="nav-buttons">
+			<button class="back-button" onclick="goBack()">Back</button>
+			<button onclick="watchVideo()">Watch Video</button>
+		</div>
+
+		<div id="error-message" class="error-message" style="display: none;"></div>
+
+		<div id="searchContainer" class="search-container" style="display: none;">
+			<input type="text" id="videoIdInput" placeholder="Enter Video ID">
+			<input type="submit" value="Search" onclick="searchComments()">
+		</div>
+
+		<!-- Channel Tab -->
+		<div class="channel-tab" id="channel-tab">
+			<div id="channel-info">Loading channel information...</div>
+		</div>
+
+		<!-- Video Description -->
+	       <div class="video-description" id="video-info">Loading video description...</div>
+
+
+		<div class="filters">
+			<select id="sortSelect" onchange="updateFilters()">
+				<option value="top">Sort by: Top</option>
+				<option value="new">Sort by: New</option>
+			</select>
+			<select id="sourceSelect" onchange="updateFilters()">
+				<option value="youtube">Source: YouTube</option>
+				<option value="reddit">Source: Reddit</option>
+			</select>
+		</div>
+
+		<div id="videoContainer"></div>
+		<div id="commentsContainer"></div>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+
+<script>
+var videoId = getParameterByName('q');
+var nextPageToken = ''; // To handle pagination
+var sortBy = 'top'; // Default sorting
+var source = 'youtube'; // Default source
+var isLoading = false; // To prevent multiple simultaneous requests
+
+function extractInstancesUrl() {
+    var instancesUrl = localStorage.getItem('instancesurl');
+    return instancesUrl ? 'https://' + instancesUrl : '';
+}
+
+function formatNumber(num) {
+    if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
+    if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
+    return num;
+}
+
+function showError(message) {
+    var errorMessage = document.getElementById('error-message');
+    errorMessage.textContent = message;
+    errorMessage.style.display = 'block';
+}
+
+function fetchComments(pageToken) {
+    if (isLoading) return; // Prevent multiple simultaneous requests
+    isLoading = true; // Set loading flag
+
+    if (!videoId) {
+        document.getElementById('searchContainer').style.display = 'block';
+        isLoading = false; // Reset loading flag
+        return;
+    }
+
+    var apiUrl = extractInstancesUrl() + '/api/v1/comments/';
+    var url = apiUrl + videoId + '?sort_by=' + sortBy + '&source=' + source + (pageToken ? '&continuation=' + pageToken : '');
+
+    $.ajax({
+        url: url,
+        method: 'GET',
+        success: function(response) {
+            document.getElementById('error-message').style.display = 'none';
+
+            if (response && response.comments && Array.isArray(response.comments)) {
+                // Check if this is the first time loading comments (no pageToken)
+                if (!pageToken) {
+                    $('#commentsContainer').empty(); // Clear the comments container
+
+                    // Add "Total Comments" only once
+                    var commentCount = formatNumber(response.commentCount || 0);
+                    $('#commentsContainer').append('<div class="result-item comment-count">Total Comments: ' + commentCount + '</div>');
+                }
+
+                // Append the new comments
+                response.comments.forEach(function(comment) {
+                    displayComment(comment);
+                });
+
+                // Update the nextPageToken if there are more comments to load
+                if (response.continuation) {
+                    nextPageToken = response.continuation;
+                } else {
+                    nextPageToken = null; // No more pages
+                }
+            } else {
+                showError('No comments found or video might be private/deleted.');
+            }
+
+            isLoading = false; // Reset loading flag
+        },
+        error: function() {
+            showError('Error fetching comments or video might be private/deleted.');
+            isLoading = false; // Reset loading flag
+        }
+    });
+}
+
+function displayComment(comment) {
+    var replies = comment.replies || {};
+    var replyCount = replies.replyCount || 0;
+    var continuation = replies.continuation || null;
+
+    var pinnedLabel = comment.isPinned ? '<span class="pinned">📍</span>' : '';
+    var channelOwnerLabel = comment.authorIsChannelOwner ? '<span class="favorite">‎  👑 Owner</span>' : '';
+    var verifiedLabel = comment.authorVerified ? '<span class="verified">☑️ Verified</span>' : '';
+
+    var commentElement = document.createElement('div');
+    commentElement.className = 'result-item';
+    commentElement.innerHTML = '<img src="' + (comment.authorThumbnails && comment.authorThumbnails[0].url ? comment.authorThumbnails[0].url : 'default.jpg') + '">';
+    commentElement.innerHTML += '<div class="comment-author">' +
+        '<a href="channel.html?q=' + (comment.authorId || '') + '" target="_self">' + (comment.author || 'Unknown') + '</a>' +
+        (comment.creatorHeart ? '<span class="favorite">‎  ❤️ Fav</span>' : '') +
+        (pinnedLabel ? '<span class="pinned">‎  📍Pinned</span>' : '') +
+        (channelOwnerLabel ? '<span class="favorite">‎  👑Owner</span>' : '') +
+        (verifiedLabel ? '<span class="verified">☑️ Verified</span>' : '') +
+        '</div>' +
+        '<div class="comment-content">' + formatContent(comment.content) + '</div>' +
+        '<div class="comment-time">' + comment.publishedText + '</div>' +
+        '<div class="comment-stats">' +
+        '<span>Replies: ' + formatNumber(replyCount) + '</span>' +
+        '<span> 👍: ' + formatNumber(comment.likeCount || 0) + '</span>' +
+        '<span>👎: ' + formatNumber(comment.dislikeCount || 0) + '</span>' +
+        '</div>' +
+        (continuation ? '<button class="reply-button" onclick="fetchReplies(\'' + continuation + '\', this)">Load Replies</button>' : '') +
+        '<button class="hide-replies-button" onclick="toggleReplies(this)">Hide Replies</button>' +
+        '<div class="replies-container"></div>';
+
+    document.getElementById('commentsContainer').appendChild(commentElement);
+}
+
+function formatContent(content) {
+    content = content.split('<br>').shift();
+    content = content.replace(/(https?:\/\/[^\s<]+)/g, function(match) {
+        return '<a href="' + match.split('<br')[0] + '" target="_blank" rel="noopener noreferrer">' + match + '</a>';
+    });
+    return content.replace(/\n/g, '<br>');
+}
+
+function fetchVideoDetails(videoId) {
+    var apiUrl = extractInstancesUrl() + '/api/v1/videos/' + videoId;
+
+    $.ajax({
+        url: apiUrl,
+        method: 'GET',
+        success: function(response) {
+            if (response && response.title && response.description) {
+                // Display the video info and channel info
+                displayVideoInfo(response);
+                displayChannelInfo(response);
+            } else {
+                showError('No video details found.');
+            }
+        },
+        error: function() {
+            showError('Error fetching video details.');
+        }
+    });
+}
+
+function displayVideoInfo(video) {
+    // Process description HTML
+    var formattedDescription = formatDescription(video.description);
+
+    // Construct HTML for video details
+    var videoDetails = '<strong>' + video.title + '</strong><br><br>' +
+        formattedDescription + '<br><br>' +
+        '<div><strong>Published:</strong> ' + video.publishedText + '</div><br>' +
+        '<div><strong>Views:</strong> ' + formatNumber(video.viewCount) + '</div><br>' +
+        '<div><strong>Likes:</strong> ' + formatNumber(video.likeCount) + '</div>';
+
+    // Update the video description section
+    $('#video-info').html(videoDetails);
+}
+
+function displayChannelInfo(video) {
+    // Channel name linking to channel page
+    var channelLink = '<a href="channel.html?q=' + video.authorId + '" target="_self">' + video.author + '</a>';
+
+    // Update the channel info section
+    var channelInfoHtml = '<div><strong>Channel:</strong> ' + channelLink + '</div><br>';
+    $('#channel-info').html(channelInfoHtml);
+}
+
+function formatDescription(description) {
+    description = description.split('<br>').shift();
+    description = description.replace(/(https?:\/\/[^\s<]+)/g, function(match) {
+        return '<a href="' + match.split('<br')[0] + '" target="_blank" rel="noopener noreferrer">' + match + '</a>';
+    });
+    return description.replace(/\n/g, '<br>');
+}
+
+function fetchReplies(continuationToken, button) {
+    var apiUrl = extractInstancesUrl() + '/api/v1/comments/';
+    var url = apiUrl + videoId + '?continuation=' + continuationToken + '&sort_by=' + sortBy + '&source=' + source;
+
+    $.ajax({
+        url: url,
+        method: 'GET',
+        success: function(response) {
+            if (response && response.comments && Array.isArray(response.comments)) {
+                var repliesContainer = button.nextElementSibling.nextElementSibling;
+                response.comments.forEach(function(reply) {
+                    displayReply(reply, repliesContainer);
+                });
+
+                if (response.continuation) {
+                    button.setAttribute('onclick', 'fetchReplies(\'' + response.continuation + '\', this)');
+                    button.style.display = 'block';
+                } else {
+                    button.style.display = 'none';
+                }
+            }
+        },
+        error: function() {
+            showError('Error fetching replies.');
+        }
+    });
+}
+
+function displayReply(reply, container) {
+    var verifiedLabel = reply.authorVerified ? '<span class="verified">Verified</span>' : '';
+
+    var replyElement = document.createElement('div');
+    replyElement.className = 'reply';
+    replyElement.innerHTML = '<img src="' + (reply.authorThumbnails && reply.authorThumbnails[0].url || 'default.jpg') + '" class="channel-thumbnail" alt="' + (reply.author || 'Unknown') + '">' +
+        '<div class="reply-author">' +
+        '<a href="channel.html?q=' + (reply.authorId || '') + '" target="_self">' + (reply.author || 'Unknown') + '</a>' +
+        verifiedLabel +
+        '</div>' +
+        '<div class="reply-content">' + formatContent(reply.content) + '</div>' +
+        '<div class="reply-time">' + reply.publishedText + '</div>' +
+        '<div class="reply-stats">' +
+        '<span>Likes:' + formatNumber(reply.likeCount || 0) + '</span>' +
+        '</div>';
+
+    container.appendChild(replyElement);
+}
+
+function toggleReplies(button) {
+    var repliesContainer = button.nextElementSibling;
+    if (repliesContainer.style.display === 'none' || repliesContainer.style.display === '') {
+        repliesContainer.style.display = 'block';
+        button.textContent = 'Hide Replies';
+    } else {
+        repliesContainer.style.display = 'none';
+        button.textContent = 'Show Replies';
+    }
+}
+
+function updateFilters() {
+    sortBy = document.getElementById('sortSelect').value;
+    source = document.getElementById('sourceSelect').value;
+    document.getElementById('commentsContainer').innerHTML = '';
+    fetchComments(); // Fetch comments again with new filters
+}
+
+function goBack() {
+    window.history.back();
+}
+
+function watchVideo() {
+    window.location.href = 'youtube://m.youtube.com/embed/' + videoId;
+}
+
+function searchComments() {
+    videoId = document.getElementById('videoIdInput').value.trim();
+    nextPageToken = ''; // Reset pagination
+    fetchComments(); // Fetch comments for the new video ID
+}
+
+function getParameterByName(name) {
+    var regex = new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)', 'i');
+    var match = regex.exec(window.location.search);
+    return match ? decodeURIComponent(match[1]) : '';
+}
+
+$(window).scroll(function() {
+    if ($(window).scrollTop() + $(window).height() > $(document).height() - 100 && nextPageToken && !isLoading) {
+        fetchComments(nextPageToken);
+    }
+});
+
+$(document).ready(function() {
+    fetchVideoDetails(videoId); // Fetch video details on page load
+    fetchComments(); // Fetch comments on page load
+});
+
+	</script>
+	</body>
+</html>

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>items</key>
+    <array>
+        <!-- Preferences Group -->
+        <dict>
+            <key>cell</key>
+            <string>PSGroupCell</string>
+            <key>label</key>
+            <string>Preferences</string>
+        </dict>
+
+        <!-- Text Field to Set Latest Version -->
+
+<dict>
+    <key>cell</key>
+    <string>PSTextFieldCell</string>
+    <key>label</key>
+    <string>Set Latest Version</string>
+    <key>key</key>
+    <string>customVersion</string>
+    <key>default</key>
+    <string>18.18</string> <!-- Default Version -->
+    <key>defaults</key>
+    <string>com.ahmadjerjawi.tubeforgepref</string>
+    <key>keyboardType</key>
+    <string>UIKeyboardTypeDecimalPad</string>
+</dict>
+
+
+        <!-- Button to Open Version Page URL -->
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>label</key>
+			<string>See Last YouTube Version</string>
+			<key>url</key>
+			<string>https://raw.githubusercontent.com/ahmadjerjawi/Invidious-list/refs/heads/main/output/youtube-version</string>
+			<key>cellClass</key>
+			<string>HBLinkTableCell</string>
+			<key>iconImageSystem</key>
+			<dict>
+        
+        <!-- Wants Search -->
+        <dict>
+            <key>cell</key>
+            <string>PSSwitchCell</string>
+            <key>default</key>
+            <true/>
+            <key>defaults</key>
+            <string>com.ahmadjerjawi.tubeforgepref</string>
+            <key>key</key>
+            <string>wantsSearch</string>
+            <key>label</key>
+            <string>Search Page</string>
+        </dict>
+        <!-- Switch for Home Page -->
+        <dict>
+            <key>cell</key>
+            <string>PSSwitchCell</string>
+            <key>default</key>
+            <true/>
+            <key>defaults</key>
+            <string>com.ahmadjerjawi.tubeforgepref</string>
+            <key>key</key>
+            <string>wantsHome</string>
+            <key>label</key>
+            <string>Home Page</string>
+        </dict>
+
+        <!-- Switch for Side Menu -->
+        <dict>
+            <key>cell</key>
+            <string>PSSwitchCell</string>
+            <key>default</key>
+            <true/>
+            <key>defaults</key>
+            <string>com.ahmadjerjawi.tubeforgepref</string>
+            <key>key</key>
+            <string>wantsMenu</string>
+            <key>label</key>
+            <string>Side Menu</string>
+        </dict>
+
+        <!-- Switch for Redirect Home Page -->
+        <dict>
+            <key>cell</key>
+            <string>PSSwitchCell</string>
+            <key>default</key>
+            <false/>
+            <key>defaults</key>
+            <string>com.ahmadjerjawi.tubeforgepref</string>
+            <key>key</key>
+            <string>wantsRedirectHome</string>
+            <key>label</key>
+            <string>Redirect Home Page</string>
+        </dict>
+
+        <!-- Switch for Redirect Search Page -->
+        <dict>
+            <key>cell</key>
+            <string>PSSwitchCell</string>
+            <key>default</key>
+            <false/>
+            <key>defaults</key>
+            <string>com.ahmadjerjawi.tubeforgepref</string>
+            <key>key</key>
+            <string>wantsRedirectSearch</string>
+            <key>label</key>
+            <string>Redirect Search Page</string>
+        </dict>
+    </array>
+
+    <key>title</key>
+    <string>TubeForge</string>
+</dict>
+</plist>

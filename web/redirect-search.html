@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting...</title>
+</head>
+<body>
+    <script>
+        function getQueryParameter(param) {
+            var queryString = window.location.search.substring(1);
+            var params = queryString.split("&");
+
+            for (var i = 0; i < params.length; i++) {
+                var pair = params[i].split("=");
+                if (pair[0] == param) {
+                    return decodeURIComponent(pair[1]);
+                }
+            }
+            return null;
+        }
+
+        function extractInstancesUrl() {
+            var instancesUrl = localStorage.getItem('instancesurl');
+            var queryParam = getQueryParameter('q');
+
+            if (instancesUrl) {
+                var redirectUrl = 'https://' + instancesUrl + '/search?q=' + (queryParam ? encodeURIComponent(queryParam) : '');
+                console.log('Redirecting to:', redirectUrl);
+                window.location.href = redirectUrl;
+            } else {
+                console.log('No instances URL found in localStorage.');
+                document.body.innerHTML = "<h1>No instances URL found.</h1>";
+            }
+        }
+
+        extractInstancesUrl();
+    </script>
+</body>
+</html>

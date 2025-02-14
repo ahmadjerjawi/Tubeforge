@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API for Invidious Instances</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        #container {
+            max-width: 300px;
+            margin: 0;
+            padding: 20px;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        input[type=text] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 20px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>API for Invidious Instances</h1>
+        <input type="text" id="tokenapiInput" placeholder="Enter Token API">
+        <input type="text" id="proxyurlInput" placeholder="Enter Proxy URL">
+        <input type="text" id="instancesurlInput" placeholder="Enter Instances URL (comma-separated)">
+        <div>
+            <button id="saveButton">Save</button>
+            <button id="cancelButton">Back</button>
+        </div>
+    </div>
+    <script>
+        // Function to load data from localStorage and populate fields
+        function loadData() {
+            var tokenapi = localStorage.getItem('tokenapi') || '';
+            var proxyurl = localStorage.getItem('proxyurl') || '';
+            var instancesurl = localStorage.getItem('instancesurl') || '';
+
+            document.getElementById('tokenapiInput').value = tokenapi;
+            document.getElementById('proxyurlInput').value = proxyurl;
+            document.getElementById('instancesurlInput').value = instancesurl;
+        }
+
+        // Call loadData when the document is ready
+        document.addEventListener('DOMContentLoaded', loadData);
+
+        // Save data to localStorage and redirect
+        document.getElementById('saveButton').addEventListener('click', function() {
+            var tokenapi = document.getElementById('tokenapiInput').value.trim();
+            var proxyurl = document.getElementById('proxyurlInput').value.trim();
+            var instancesurl = document.getElementById('instancesurlInput').value.trim();
+
+            // Save the data to localStorage
+            localStorage.setItem('tokenapi', tokenapi);
+            localStorage.setItem('proxyurl', proxyurl);
+            localStorage.setItem('instancesurl', instancesurl);
+
+            // Redirect to menu.html
+            window.location.href = "menu.html";
+        });
+
+        // Navigate to another page
+        document.getElementById('cancelButton').addEventListener('click', function() {
+            window.location.href = "menu.html"; // Update this as needed
+        });
+    </script>
+</body>
+</html>
