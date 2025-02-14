@@ -1,3 +1,9 @@
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/86ba4b00-c1d6-4e87-8497-45f0cd15f3fb" alt="favicon" />
+</div>
+
+![Best](https://github.com/user-attachments/assets/a1cf3806-1fca-4b1d-bd4b-908dcfe7f839)
+
 # TubeForge - YouTube Revive for iOS 7-10
 **Note:**
 Due to the emergence of a better solution that utilizes proxying instead of a custom GUI, this project might not meet current expectations. Consider exploring more recent alternatives if you're looking to revive legacy YouTube functionality on older iOS devices.
